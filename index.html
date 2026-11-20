@@ -1,0 +1,315 @@
+
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#101827">
+<title>Văn Nhất - Quản lý dòng tiền</title>
+<style>
+*{box-sizing:border-box}
+body{margin:0;background:#f1f5f9;color:#172033;font-family:Arial,sans-serif}
+header{background:#101827;color:white;padding:22px 17px}
+header h2{margin:0 0 6px;font-size:22px}
+header p{margin:0;color:#aab7ca;font-size:13px}
+.container{max-width:850px;margin:auto;padding:14px}
+.stats{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.card{background:white;border-radius:13px;padding:15px;margin-bottom:12px;box-shadow:0 2px 9px #00000009}
+.stat small{color:#64748b;font-size:12px}
+.stat strong{display:block;margin-top:9px;font-size:19px;overflow-wrap:anywhere}
+.green{color:#059669}.red{color:#dc2626}.blue{color:#2563eb}
+nav{display:flex;gap:7px;overflow-x:auto;margin:12px 0;padding-bottom:5px}
+nav button{white-space:nowrap;border:0;border-radius:9px;padding:11px 13px;background:white;color:#475569;font-weight:bold}
+nav button.active{background:#16734c;color:white}
+h3{font-size:16px;margin:3px 0 14px}
+input,select,textarea{width:100%;padding:12px;border:1px solid #dbe2ea;border-radius:9px;margin:6px 0 12px;font-size:14px;background:white}
+label{font-size:13px;font-weight:bold;color:#475569}
+button{cursor:pointer}
+.btn{border:0;border-radius:9px;padding:12px 15px;background:#16734c;color:white;font-weight:bold}
+.btn2{border:0;border-radius:9px;padding:10px 13px;background:#e2e8f0;color:#334155;font-weight:bold}
+.danger{background:#fee2e2;color:#b91c1c}
+.row{display:flex;gap:8px;flex-wrap:wrap}
+.row>*{flex:1}
+.item{border:1px solid #e5eaf0;border-radius:10px;padding:12px;margin:9px 0}
+.item strong{font-size:14px}
+.item p{font-size:13px;color:#64748b;margin:6px 0}
+.tag{font-size:11px;padding:4px 7px;border-radius:20px;background:#dcfce7;color:#15803d}
+.tag.off{background:#fef3c7;color:#92400e}
+.hidden{display:none!important}
+.muted{color:#64748b;font-size:12px}
+.bar{height:9px;background:#e2e8f0;border-radius:10px;overflow:hidden;margin-top:7px}
+.bar span{display:block;height:100%;background:#16a36a}
+footer{text-align:center;padding:20px;color:#94a3b8;font-size:12px}
+</style>
+</head>
+<body>
+<header>
+<h2>VĂN NHẤT</h2>
+<p>HỆ THỐNG QUẢN LÝ KINH DOANH ACC GAME</p>
+</header>
+
+<div class="container">
+<section class="stats">
+<div class="card stat"><small>Tổng doanh thu</small><strong class="blue" id="revenue">0đ</strong></div>
+<div class="card stat"><small>Tổng vốn đã nhập</small><strong id="capital">0đ</strong></div>
+<div class="card stat"><small>Lợi nhuận đã bán</small><strong class="green" id="profit">0đ</strong></div>
+<div class="card stat"><small>Số acc tồn kho</small><strong id="stock">0</strong></div>
+</section>
+
+<nav>
+<button class="active" onclick="tab('home',this)">Tổng quan</button>
+<button onclick="tab('accounts',this)">Quản lý acc</button>
+<button onclick="tab('money',this)">Thu chi</button>
+<button onclick="tab('customers',this)">Khách hàng</button>
+<button onclick="tab('backup',this)">Sao lưu</button>
+</nav>
+
+<section id="home">
+<div class="card">
+<h3>📊 Tình hình kinh doanh</h3>
+<div class="row">
+<div><small class="muted">Acc đã bán</small><h2 id="sold">0</h2></div>
+<div><small class="muted">Acc đang tồn</small><h2 id="unsold">0</h2></div>
+</div>
+<div class="muted">Tỷ lệ bán hàng</div>
+<div class="bar"><span id="progress" style="width:0%"></span></div>
+<p class="muted" id="ratio">Chưa có dữ liệu</p>
+</div>
+<div class="card">
+<h3>💰 Tổng thu chi khác</h3>
+<p>Thu khác: <strong class="green" id="otherIncome">0đ</strong></p>
+<p>Chi khác: <strong class="red" id="otherExpense">0đ</strong></p>
+<p>Lợi nhuận sau thu chi: <strong id="net">0đ</strong></p>
+</div>
+<div class="card">
+<h3>🕒 Giao dịch gần đây</h3>
+<div id="recent" class="muted">Chưa có giao dịch.</div>
+</div>
+</section>
+
+<section id="accounts" class="hidden">
+<div class="card">
+<h3>➕ Nhập acc mới</h3>
+<label>Mã số (MS)</label>
+<input id="ms" placeholder="Ví dụ: MS 898">
+<label>Tên / mô tả acc</label>
+<input id="accname" placeholder="Ví dụ: Acc Bedwars">
+<label>Giá nhập (VNĐ)</label>
+<input id="buy" type="number" min="0" placeholder="Giá mua acc">
+<label>Giá bán dự kiến (VNĐ)</label>
+<input id="ask" type="number" min="0" placeholder="Giá dự kiến">
+<label>Ghi chú</label>
+<textarea id="note" placeholder="Thông tin thêm..." rows="2"></textarea>
+<button class="btn" onclick="addAccount()">Lưu acc</button>
+</div>
+<div class="card">
+<h3>📦 Danh sách acc</h3>
+<input id="filter" placeholder="Tìm theo MS hoặc tên..." oninput="renderAccounts()">
+<div id="accountList"></div>
+</div>
+</section>
+
+<section id="money" class="hidden">
+<div class="card">
+<h3>➕ Ghi nhận thu chi</h3>
+<label>Loại giao dịch</label>
+<select id="kind">
+<option value="income">Thu tiền</option>
+<option value="expense">Chi tiền</option>
+</select>
+<label>Nội dung</label>
+<input id="description" placeholder="Ví dụ: Nạp Gcube, phí giao dịch...">
+<label>Số tiền (VNĐ)</label>
+<input id="amount" type="number" min="1" placeholder="Nhập số tiền">
+<button class="btn" onclick="addMoney()">Lưu giao dịch</button>
+</div>
+<div class="card">
+<h3>📒 Lịch sử thu chi</h3>
+<div id="moneyList"></div>
+</div>
+</section>
+
+<section id="customers" class="hidden">
+<div class="card">
+<h3>👥 Thêm khách hàng</h3>
+<label>Tên khách hàng</label>
+<input id="customerName" placeholder="Tên khách">
+<label>Số điện thoại / Zalo</label>
+<input id="customerPhone" placeholder="Thông tin liên hệ">
+<label>Ghi chú</label>
+<input id="customerNote" placeholder="Ghi chú khách hàng">
+<button class="btn" onclick="addCustomer()">Lưu khách hàng</button>
+</div>
+<div class="card">
+<h3>Danh sách khách hàng</h3>
+<div id="customerList"></div>
+</div>
+</section>
+
+<section id="backup" class="hidden">
+<div class="card">
+<h3>💾 Sao lưu dữ liệu</h3>
+<p class="muted">Tải toàn bộ dữ liệu về máy dưới dạng file JSON. Hãy lưu file ở nơi an toàn.</p>
+<button class="btn" onclick="backup()">⬇ Xuất file sao lưu</button>
+</div>
+<div class="card">
+<h3>♻ Khôi phục dữ liệu</h3>
+<p class="muted">Chọn file JSON đã sao lưu trước đó. Dữ liệu hiện tại sẽ được thay thế.</p>
+<input type="file" id="restoreFile" accept=".json">
+<button class="btn" onclick="restore()">Khôi phục dữ liệu</button>
+</div>
+<div class="card">
+<h3>📊 Xuất danh sách acc</h3>
+<button class="btn2" onclick="exportCSV()">Xuất Excel (CSV)</button>
+</div>
+<div class="card">
+<h3>⚠ Quản lý dữ liệu</h3>
+<p class="muted">Xóa toàn bộ dữ liệu trên thiết bị này. Hãy sao lưu trước khi thực hiện.</p>
+<button class="btn danger" onclick="clearData()">Xóa toàn bộ dữ liệu</button>
+</div>
+</section>
+</div>
+<footer>VĂN NHẤT © 2026 · Quản lý kinh doanh acc game</footer>
+
+<script>
+const KEY="van_nhat_manager_v1";
+let data={accounts:[],money:[],customers:[]};
+try{
+const saved=localStorage.getItem(KEY);
+if(saved)data=Object.assign(data,JSON.parse(saved));
+}catch(e){}
+function save(){localStorage.setItem(KEY,JSON.stringify(data));renderAll()}
+function money(n){return (Number(n)||0).toLocaleString("vi-VN")+"đ"}
+function esc(s){return String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]))}
+function tab(id,btn){
+document.querySelectorAll(".container section").forEach(x=>x.classList.add("hidden"));
+document.getElementById(id).classList.remove("hidden");
+document.querySelectorAll("nav button").forEach(x=>x.classList.remove("active"));
+btn.classList.add("active");renderAll();
+}
+function addAccount(){
+let ms=document.getElementById("ms").value.trim();
+let name=document.getElementById("accname").value.trim();
+let buy=Number(document.getElementById("buy").value);
+let ask=Number(document.getElementById("ask").value);
+if(!ms||!name||buy<0||!Number.isFinite(buy)||!Number.isFinite(ask)||ask<0){alert("Vui lòng nhập đầy đủ và đúng thông tin.");return}
+if(data.accounts.some(a=>a.ms.toLowerCase()===ms.toLowerCase())){alert("Mã MS này đã tồn tại.");return}
+data.accounts.unshift({id:Date.now(),ms,name,buy,ask,note:document.getElementById("note").value,sold:false,sell:0,customer:"",date:new Date().toLocaleDateString("vi-VN")});
+["ms","accname","buy","ask","note"].forEach(x=>document.getElementById(x).value="");
+save();alert("Đã lưu acc!");
+}
+function sellAccount(id){
+let a=data.accounts.find(x=>x.id===id);if(!a||a.sold)return;
+let price=prompt("Nhập giá bán thực tế (VNĐ):",a.ask);
+if(price===null)return;
+price=Number(price);
+if(!Number.isFinite(price)||price<0){alert("Giá bán không hợp lệ.");return}
+let customer=prompt("Tên khách hàng (có thể để trống):","")||"";
+a.sold=true;a.sell=price;a.customer=customer;a.sellDate=new Date().toLocaleDateString("vi-VN");
+save();
+}
+function deleteAccount(id){
+if(!confirm("Xóa acc này?"))return;
+data.accounts=data.accounts.filter(x=>x.id!==id);save();
+}
+function renderAccounts(){
+let q=(document.getElementById("filter")?.value||"").toLowerCase();
+let list=data.accounts.filter(a=>(a.ms+" "+a.name).toLowerCase().includes(q));
+document.getElementById("accountList").innerHTML=list.map(a=>`
+<div class="item">
+<strong>${esc(a.ms)} · ${esc(a.name)}</strong>
+<p>Vốn: ${money(a.buy)} · Giá dự kiến: ${money(a.ask)}</p>
+<p>${esc(a.note)}</p>
+${a.sold?`<span class="tag">Đã bán</span><p>Giá bán: ${money(a.sell)} · Lãi: <b class="${a.sell-a.buy>=0?"green":"red"}">${money(a.sell-a.buy)}</b></p><p>Khách: ${esc(a.customer)}</p>`:`<span class="tag off">Chưa bán</span><div class="row"><button class="btn" onclick="sellAccount(${a.id})">Đánh dấu đã bán</button><button class="btn2 danger" onclick="deleteAccount(${a.id})">Xóa</button></div>`}
+</div>`).join("")||'<p class="muted">Chưa có acc nào.</p>';
+}
+function addMoney(){
+let kind=document.getElementById("kind").value;
+let desc=document.getElementById("description").value.trim();
+let amount=Number(document.getElementById("amount").value);
+if(!desc||!Number.isFinite(amount)||amount<=0){alert("Vui lòng nhập nội dung và số tiền hợp lệ.");return}
+data.money.unshift({id:Date.now(),kind,desc,amount,date:new Date().toLocaleString("vi-VN")});
+document.getElementById("description").value="";document.getElementById("amount").value="";
+save();alert("Đã lưu giao dịch!");
+}
+function deleteMoney(id){
+if(!confirm("Xóa giao dịch này?"))return;
+data.money=data.money.filter(x=>x.id!==id);save();
+}
+function addCustomer(){
+let name=document.getElementById("customerName").value.trim();
+if(!name){alert("Hãy nhập tên khách hàng.");return}
+data.customers.unshift({id:Date.now(),name,phone:document.getElementById("customerPhone").value,note:document.getElementById("customerNote").value});
+["customerName","customerPhone","customerNote"].forEach(x=>document.getElementById(x).value="");
+save();
+}
+function renderCustomers(){
+document.getElementById("customerList").innerHTML=data.customers.map(c=>`<div class="item"><strong>${esc(c.name)}</strong><p>${esc(c.phone)}</p><p>${esc(c.note)}</p><button class="btn2 danger" onclick="deleteCustomer(${c.id})">Xóa</button></div>`).join("")||'<p class="muted">Chưa có khách hàng.</p>';
+}
+function deleteCustomer(id){
+if(!confirm("Xóa khách hàng?"))return;
+data.customers=data.customers.filter(c=>c.id!==id);save();
+}
+function renderMoney(){
+document.getElementById("moneyList").innerHTML=data.money.map(m=>`<div class="item"><strong class="${m.kind==="income"?"green":"red"}">${m.kind==="income"?"THU":"CHI"} · ${money(m.amount)}</strong><p>${esc(m.desc)}</p><p>${esc(m.date)}</p><button class="btn2 danger" onclick="deleteMoney(${m.id})">Xóa</button></div>`).join("")||'<p class="muted">Chưa có giao dịch.</p>';
+}
+function renderHome(){
+let sold=data.accounts.filter(a=>a.sold);
+let stock=data.accounts.filter(a=>!a.sold);
+let revenue=sold.reduce((s,a)=>s+a.sell,0);
+let capital=data.accounts.reduce((s,a)=>s+a.buy,0);
+let profit=sold.reduce((s,a)=>s+a.sell-a.buy,0);
+let income=data.money.filter(m=>m.kind==="income").reduce((s,m)=>s+m.amount,0);
+let expense=data.money.filter(m=>m.kind==="expense").reduce((s,m)=>s+m.amount,0);
+document.getElementById("revenue").textContent=money(revenue);
+document.getElementById("capital").textContent=money(capital);
+document.getElementById("profit").textContent=money(profit);
+document.getElementById("stock").textContent=stock.length;
+document.getElementById("sold").textContent=sold.length;
+document.getElementById("unsold").textContent=stock.length;
+let ratio=data.accounts.length?Math.round(sold.length/data.accounts.length*100):0;
+document.getElementById("progress").style.width=ratio+"%";
+document.getElementById("ratio").textContent="Đã bán "+ratio+"% tổng số acc";
+document.getElementById("otherIncome").textContent=money(income);
+document.getElementById("otherExpense").textContent=money(expense);
+document.getElementById("net").textContent=money(profit+income-expense);
+document.getElementById("recent").innerHTML=[
+...sold.slice(0,5).map(a=>`<p>🟢 ${esc(a.ms)} · Bán ${money(a.sell)}</p>`),
+...data.money.slice(0,5).map(m=>`<p>${m.kind==="income"?"🟢":"🔴"} ${esc(m.desc)} · ${money(m.amount)}</p>`)
+].slice(0,7).join("")||"Chưa có giao dịch.";
+}
+function renderAll(){renderHome();renderAccounts();renderMoney();renderCustomers()}
+function backup(){
+let blob=new Blob([JSON.stringify(data,null,2)],{type:"application/json"});
+let url=URL.createObjectURL(blob),a=document.createElement("a");
+a.href=url;a.download="Van-Nhat-Sao-Luu-"+new Date().toISOString().slice(0,10)+".json";a.click();URL.revokeObjectURL(url);
+}
+function restore(){
+let file=document.getElementById("restoreFile").files[0];
+if(!file){alert("Hãy chọn file sao lưu.");return}
+if(!confirm("Khôi phục sẽ thay thế dữ liệu hiện tại. Bạn có chắc không?"))return;
+let reader=new FileReader();
+reader.onload=()=>{
+try{
+let d=JSON.parse(reader.result);
+if(!Array.isArray(d.accounts)||!Array.isArray(d.money)||!Array.isArray(d.customers))throw Error();
+data=d;save();alert("Khôi phục thành công!");
+}catch(e){alert("File không hợp lệ hoặc bị lỗi.")}
+};
+reader.readAsText(file);
+}
+function exportCSV(){
+let rows=[["MS","Tên acc","Giá nhập","Giá bán dự kiến","Trạng thái","Giá bán thực tế","Khách hàng","Ghi chú"]];
+data.accounts.forEach(a=>rows.push([a.ms,a.name,a.buy,a.ask,a.sold?"Đã bán":"Chưa bán",a.sell,a.customer,a.note]));
+let csv="\uFEFF"+rows.map(r=>r.map(x=>'"'+String(x??"").replace(/"/g,'""')+'"').join(",")).join("\r\n");
+let url=URL.createObjectURL(new Blob([csv],{type:"text/csv;charset=utf-8"}));
+let a=document.createElement("a");a.href=url;a.download="Danh-sach-acc-Van-Nhat.csv";a.click();URL.revokeObjectURL(url);
+}
+function clearData(){
+if(!confirm("CẢNH BÁO: Xóa toàn bộ acc, thu chi và khách hàng trên thiết bị này?"))return;
+data={accounts:[],money:[],customers:[]};save();alert("Đã xóa dữ liệu.");
+}
+renderAll();
+</script>
+</body>
+</html>
